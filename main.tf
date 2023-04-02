@@ -59,27 +59,23 @@ data "aws_secretsmanager_secret_version" "app" {
   secret_id = data.aws_secretsmanager_secret.app[count.index].id
 }
 
-resource "aws_acm_certificate" "app" {
-  domain_name       = var.app_url
-  validation_method = "DNS"
-  lifecycle {
-    create_before_destroy = true
+resource "aws_lb_target_group" "app" {
+  for_each = { for idx, tg in var.target_groups : idx => tg }
+
+  name                 = each.value.name_prefix
+  port                 = each.value.port
+  protocol             = each.value.protocol
+  target_type          = "ip"
+  vpc_id               = var.vpc_id
+  deregistration_delay = 30
+
+  health_check {
+    path     = each.value.health_check.path
+    port     = each.value.health_check.port
+    protocol = each.value.health_check.protocol
+    matcher  = each.value.health_check.matcher
   }
-  tags = var.tags
-}
-
-resource "aws_route53_record" "app_ssl_validation" {
-  allow_overwrite = true
-  name            = tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_name
-  records         = [tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_value]
-  type            = tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_type
-  zone_id         = var.zone_id
-  ttl             = 60
-}
-
-resource "aws_acm_certificate_validation" "app" {
-  certificate_arn         = aws_acm_certificate.app.arn
-  validation_record_fqdns = [aws_route53_record.app_ssl_validation.fqdn]
+  tags = each.value.tags
 }
 
 resource "aws_lb" "app" {
@@ -136,30 +132,52 @@ resource "aws_lb_listener" "https" {
     }
   }
 
-  dynamic "default_action" {
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app[0].arn
+  }
+}
+
+resource "aws_lb_listener_rule" "https_listener_rule" {
+  listener_arn = aws_lb_listener.https.arn
+
+  dynamic "condition" {
+    for_each = var.target_groups
+    content {
+      path_pattern {
+        values = ["/${condition.value.name}/*"]
+      }
+    }
+  }
+
+  dynamic "action" {
     for_each = var.target_groups
     content {
       type             = "forward"
-      target_group_arn = aws_lb_target_group.app[*].arn
+      target_group_arn = module.example_lb.target_groups_https[action.value.name_prefix].arn
     }
   }
 }
 
-resource "aws_lb_target_group" "app" {
-  for_each = { for idx, tg in var.target_groups : idx => tg }
-
-  name                 = each.value.name_prefix
-  port                 = each.value.port
-  protocol             = each.value.protocol
-  target_type          = "ip"
-  vpc_id               = var.vpc_id
-  deregistration_delay = 30
-
-  health_check {
-    path     = each.value.health_check.path
-    port     = each.value.health_check.port
-    protocol = each.value.health_check.protocol
-    matcher  = each.value.health_check.matcher
+resource "aws_acm_certificate" "app" {
+  domain_name       = var.app_url
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
   }
-  tags = each.value.tags
+  tags = var.tags
+}
+
+resource "aws_route53_record" "app_ssl_validation" {
+  allow_overwrite = true
+  name            = tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_name
+  records         = [tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_value]
+  type            = tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_type
+  zone_id         = var.zone_id
+  ttl             = 60
+}
+
+resource "aws_acm_certificate_validation" "app" {
+  certificate_arn         = aws_acm_certificate.app.arn
+  validation_record_fqdns = [aws_route53_record.app_ssl_validation.fqdn]
 }
