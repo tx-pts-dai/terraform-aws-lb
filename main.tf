@@ -46,8 +46,25 @@ data "aws_secretsmanager_secret_version" "app" {
   secret_id = data.aws_secretsmanager_secret.app[count.index].id
 }
 
-resource "aws_lb_target_group" "app" {
-  for_each             = { for idx, tg in var.target_groups : idx => tg }
+resource "aws_lb_target_group" "default" {
+  name                 = var.default_target_group.name
+  port                 = var.default_target_group.port
+  protocol             = var.default_target_group.protocol
+  target_type          = "ip"
+  vpc_id               = var.vpc_id
+  deregistration_delay = 30
+
+  health_check {
+    path     = var.default_target_group.health_check.path
+    port     = var.default_target_group.health_check.port
+    protocol = var.default_target_group.health_check.protocol
+    matcher  = var.default_target_group.health_check.matcher
+  }
+  tags = each.value.tags
+}
+  
+resource "aws_lb_target_group" "path" {
+  for_each             = { for idx, tg in var.path_target_groups : idx => tg }
   name                 = each.value.name
   port                 = each.value.port
   protocol             = each.value.protocol
@@ -118,12 +135,9 @@ resource "aws_lb_listener" "https" {
     }
   }
 
-  dynamic "default_action" {
-    for_each = aws_lb_target_group.app
-    content {
-      type             = "forward"
-      target_group_arn = aws_lb_target_group.app[0].arn
-    }
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.default.arn
   }
 }
 
@@ -132,7 +146,7 @@ resource "aws_lb_listener_rule" "https_listener_rule" {
   listener_arn = aws_lb_listener.https.arn
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.app[each.key].arn
+    target_group_arn = aws_lb_target_group.path[each.key].arn
   }
 
   condition {
