@@ -47,7 +47,7 @@ data "aws_secretsmanager_secret_version" "app" {
 }
 
 resource "aws_lb_target_group" "app" {
-  for_each             = var.target_groups
+  for_each             = { for idx, tg in var.target_groups : idx => tg }
   name                 = each.value.name
   port                 = each.value.port
   protocol             = each.value.protocol
@@ -127,25 +127,25 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-#resource "aws_lb_listener_rule" "https_listener_rule" {
-#  for_each = aws_lb_target_group.app
-#  listener_arn = aws_lb_listener.https.arn
-#
-#  dynamic "condition" {
-#    content {
-#      path_pattern {
-#        values = ["/${each.value.name}/*"]
-#      }
-#    }
-#  }
-#
-#  dynamic "action" {
-#    content {
-#      type             = "forward"
-#      target_group_arn = each.value.arn
-#    }
-#  }
-#}
+resource "aws_lb_listener_rule" "https_listener_rule" {
+  for_each = { for idx, tg in var.target_groups : idx => tg }
+  listener_arn = aws_lb_listener.https.arn
+
+  dynamic "condition" {
+    content {
+      path_pattern {
+        values = ["/${each.value.name}/*"]
+      }
+    }
+  }
+
+  dynamic "action" {
+    content {
+      type             = "forward"
+      target_group_arn = each.value.arn
+    }
+  }
+}
 
 resource "aws_acm_certificate" "app" {
   domain_name       = var.app_url
