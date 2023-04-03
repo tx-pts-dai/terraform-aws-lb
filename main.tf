@@ -130,23 +130,18 @@ resource "aws_lb_listener" "https" {
 resource "aws_lb_listener_rule" "https_listener_rule" {
   for_each = { for idx, tg in var.target_groups : idx => tg }
   listener_arn = aws_lb_listener.https.arn
-
-  dynamic "condition" {
-    content {
-      path_pattern {
-        values = ["/${each.value.name}/*"]
-      }
-    }
+  action {
+    type             = "forward"
+    target_group_arn = each.value.arn
   }
 
-  dynamic "action" {
-    content {
-      type             = "forward"
-      target_group_arn = each.value.arn
+  condition {
+    path_pattern {
+      values = ["/${each.value.name}/*"]
     }
   }
 }
-
+  
 resource "aws_acm_certificate" "app" {
   domain_name       = var.app_url
   validation_method = "DNS"
