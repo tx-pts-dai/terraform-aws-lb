@@ -60,7 +60,7 @@ resource "aws_lb_target_group" "default" {
     protocol = var.default_target_group.health_check.protocol
     matcher  = var.default_target_group.health_check.matcher
   }
-  tags = each.value.tags
+  tags = var.default_target_group.tags
 }
   
 resource "aws_lb_target_group" "path" {
