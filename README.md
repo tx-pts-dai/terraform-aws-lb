@@ -30,7 +30,7 @@ module "lb" {
 }
 ```
 
-As optional, extra target groups can be set. Those could be then reached through path based routing.
+As optional, extra target groups can be set. Those could be then reached through path based routing. Each target group must specify the following properties. As optional, they can have dedicated tags.
 ```hcl
 module "lb" {
   source               = "github.com/tx-pts-dai/terraform-aws-lb"
