@@ -121,9 +121,9 @@ resource "aws_lb_listener" "https" {
         authorization_endpoint     = "https://login.tx.group/oauth2/v1/authorize"
         client_id                  = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_client_id"]
         client_secret              = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_client_secret"]
-        issuer                     = "https://login.tx.group"
-        token_endpoint             = "https://login.tx.group/oauth2/v1/token"
-        user_info_endpoint         = "https://login.tx.group/oauth2/v1/userinfo"
+        issuer                     = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_login_url"]
+        token_endpoint             = "${jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_login_url"]}/oauth2/v1/token"
+        user_info_endpoint         = "${jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_login_url"]}/oauth2/v1/userinfo"
         session_cookie_name        = "AWSELBAuthSessionCookie"
         session_timeout            = "3600"
         scope                      = "openid"
@@ -132,32 +132,35 @@ resource "aws_lb_listener" "https" {
     }
   }
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app[0].arn
-  }
-}
-
-resource "aws_lb_listener_rule" "https_listener_rule" {
-  listener_arn = aws_lb_listener.https.arn
-
-  dynamic "condition" {
-    for_each = var.target_groups
-    content {
-      path_pattern {
-        values = ["/${condition.value.name}/*"]
-      }
-    }
-  }
-
-  dynamic "action" {
-    for_each = var.target_groups
+  dynamic "default_action" {
+    for_each = aws_lb_target_group.app
     content {
       type             = "forward"
-      target_group_arn = module.example_lb.target_groups_https[action.value.name_prefix].arn
+      target_group_arn = aws_lb_target_group.app[*].arn
     }
   }
 }
+
+#resource "aws_lb_listener_rule" "https_listener_rule" {
+#  listener_arn = aws_lb_listener.https.arn
+#
+#  dynamic "condition" {
+#    for_each = aws_lb_target_group.app
+#    content {
+#      path_pattern {
+#        values = ["/${condition.value.name}/*"]
+#      }
+#    }
+#  }
+#
+#  dynamic "action" {
+#    for_each = aws_lb_target_group.app
+#    content {
+#      type             = "forward"
+#      target_group_arn = aws_lb_target_group.app[action.value.name].arn
+#    }
+#  }
+#}
 
 resource "aws_acm_certificate" "app" {
   domain_name       = var.app_url
