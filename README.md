@@ -1,6 +1,6 @@
 # terraform-aws-lb module
 
-Module for handling load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional. 
+Module for handling application load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional. 
 
 Security groups are handled internally and only allow http and https traffic in.
 
@@ -65,6 +65,25 @@ As optional, extra target groups can be set. Those could be then reached through
 ```
 
 For other optional inputs, see Inputs section
+
+## Enabling logging
+ALB logs can be enabled by setting the following input:
+```hcl
+  "log_bucket" = "arn-of-an-existing-bucket"
+```
+When empty, there are no logs saved.
+
+## Enabling OKTA
+OKTA can be enabled with the following inputs:
+```hcl
+  okta_enabled = true
+  secret_name  = "aws-secret-name"
+```
+
+The secret is a JSON key-value pair that must contain the following keys:
+- okta_client_id
+- okta_client_secret
+- okta_login_url
 
 ## Contributing
 
