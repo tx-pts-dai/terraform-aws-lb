@@ -1,6 +1,6 @@
 # terraform-aws-lb module
 
-Module for handling application load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional. 
+Module for handling application load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. The name of the target group is used as the path. For example, if the target group name is `api` then it will be reachable at `hostname/api/*`, then . By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional. 
 
 Security groups are handled internally and only allow http and https traffic in.
 
