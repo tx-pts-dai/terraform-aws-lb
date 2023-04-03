@@ -30,7 +30,7 @@ module "lb" {
 }
 ```
 
-As optional, extra target groups can be set. Those will be reached through path based routing.
+As optional, extra target groups can be set. Those could be then reached through path based routing.
 ```hcl
   path_target_groups   = [
     {
