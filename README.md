@@ -32,6 +32,9 @@ module "lb" {
 
 As optional, extra target groups can be set. Those could be then reached through path based routing.
 ```hcl
+module "lb" {
+  source               = "github.com/tx-pts-dai/terraform-aws-lb"
+  ...
   path_target_groups   = [
     {
       name = "ws"
@@ -62,6 +65,7 @@ As optional, extra target groups can be set. Those could be then reached through
       }
     }
   ]
+}
 ```
 
 For other optional inputs, see Inputs section
