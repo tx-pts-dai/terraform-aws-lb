@@ -3,7 +3,7 @@ variable "name" {
   type        = string
 }
 
-variable "target_groups" {
+variable "path_target_groups" {
   description = "Definition of the target groups. Each target group is accessed via path based routing."
   type = list(object({
     name     = string
@@ -17,6 +17,23 @@ variable "target_groups" {
     })
     tags = map(string)
   }))
+}
+
+
+variable "default_target_group" {
+  description = "Definition of the default target group. The one reachable by default ('/')."
+  type = object({
+    name     = string
+    protocol = string
+    port     = number
+    health_check = object({
+      path     = string
+      port     = string
+      protocol = string
+      matcher  = string
+    })
+    tags = map(string)
+  })
 }
 
 variable "subnets" {
