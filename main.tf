@@ -142,7 +142,7 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_lb_listener_rule" "https_listener_rule" {
-  for_each = { for idx, tg in var.target_groups : idx => tg }
+  for_each = { for idx, tg in var.path_target_groups : idx => tg }
   listener_arn = aws_lb_listener.https.arn
   action {
     type             = "forward"
