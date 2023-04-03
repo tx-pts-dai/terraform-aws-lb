@@ -62,7 +62,7 @@ data "aws_secretsmanager_secret_version" "app" {
 resource "aws_lb_target_group" "app" {
   for_each = { for idx, tg in var.target_groups : idx => tg }
 
-  name                 = each.value.name_prefix
+  name                 = each.value.name
   port                 = each.value.port
   protocol             = each.value.protocol
   target_type          = "ip"
