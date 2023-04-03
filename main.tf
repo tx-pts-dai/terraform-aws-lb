@@ -157,7 +157,7 @@ resource "aws_lb_listener_rule" "https_listener_rule" {
     for_each = aws_lb_target_group.app
     content {
       type             = "forward"
-      target_group_arn = aws_lb_target_group.app[action.value.name].arn
+      target_group_arn = aws_lb_target_group[countindex].arn
     }
   }
 }
