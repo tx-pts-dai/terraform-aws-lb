@@ -132,7 +132,7 @@ resource "aws_lb_listener_rule" "https_listener_rule" {
   listener_arn = aws_lb_listener.https.arn
   action {
     type             = "forward"
-    target_group_arn = each.value.arn
+    target_group_arn = aws_alb_target_group.app[each.key].arn
   }
 
   condition {
