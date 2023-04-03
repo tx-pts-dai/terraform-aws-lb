@@ -141,26 +141,26 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-resource "aws_lb_listener_rule" "https_listener_rule" {
-  listener_arn = aws_lb_listener.https.arn
-
-  dynamic "condition" {
-    for_each = aws_lb_target_group.app
-    content {
-      path_pattern {
-        values = ["/${condition.value.name}/*"]
-      }
-    }
-  }
-
-  dynamic "action" {
-    for_each = aws_lb_target_group.app
-    content {
-      type             = "forward"
-      target_group_arn = aws_lb_target_group[count.index].arn
-    }
-  }
-}
+#resource "aws_lb_listener_rule" "https_listener_rule" {
+#  listener_arn = aws_lb_listener.https.arn
+#
+#  dynamic "condition" {
+#    for_each = aws_lb_target_group.app
+#    content {
+#      path_pattern {
+#        values = ["/${condition.value.name}/*"]
+#      }
+#    }
+#  }
+#
+#  dynamic "action" {
+#    for_each = aws_lb_target_group.app
+#    content {
+#      type             = "forward"
+#      target_group_arn = aws_lb_target_group[count.index].arn
+#    }
+#  }
+#}
 
 resource "aws_acm_certificate" "app" {
   domain_name       = var.app_url
