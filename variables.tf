@@ -65,9 +65,9 @@ variable "log_bucket" {
 /*
   target_groups = [
     {
-      name_prefix = "web-app-tg"
+      name = "ws"
       protocol = "HTTP"
-      port = 80
+      port = 3000
       health_check = {
         path = "/health"
         port = "traffic-port"
@@ -80,7 +80,7 @@ variable "log_bucket" {
       }
     },
     {
-      name_prefix = "api-tg"
+      name = "api"
       protocol = "HTTP"
       port = 8080
       health_check = {
