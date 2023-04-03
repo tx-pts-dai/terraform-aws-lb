@@ -1,50 +1,70 @@
-# < This section can be removed >
+# terraform-aws-lb module
 
-Official doc for public modules [hashicorp](https://developer.hashicorp.com/terraform/registry/modules/publish)
+Module for handling load balancers, listeners, target groups, route53 records creation. It also handles SSL certificates creation and validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional. 
 
-Repo structure:
-
-```
-├── README.md
-├── main.tf
-├── variables.tf
-├── outputs.tf
-├── ...
-├── modules/
-│   ├── nestedA/
-│   │   ├── README.md
-│   │   ├── variables.tf
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   ├── nestedB/
-│   ├── .../
-├── examples/
-│   ├── exampleA/
-│   │   ├── main.tf
-│   ├── exampleB/
-│   ├── .../
-```
-
-# My Terraform Module
-
-< module description >
+Security groups are handled internally and only allow http and https traffic in.
 
 ## Usage
-
-< describe the module minimal code required for a deployment >
-
 ```hcl
-module "my_module_example" {
+module "lb" {
+  source               = "github.com/tx-pts-dai/terraform-aws-lb"
+  app_url              = "my-subdomain.domain"
+  name                 = "my-deployment"
+  vpc_id               = local.vpc_id
+  subnets              = data.terraform_remote_state.core_infrastructure.outputs.public_subnets.ids
+  zone_id              = data.aws_route53_zone.my_zone.zone_id
+  default_target_group = {
+    name = "client"
+    protocol = "HTTP"
+    port = 80
+    health_check = {
+      path = "/health"
+      port = "traffic-port"
+      protocol = "HTTP"
+      matcher = "200"
+    }
+    tags = {
+      Name = "Client"
+    }
+  }
 }
 ```
 
-## Explanation and description of interesting use-cases
+As optional, extra target groups can be set. Those will be reached through path based routing.
+```hcl
+  path_target_groups   = [
+    {
+      name = "ws"
+      protocol = "HTTP"
+      port = 3000
+      health_check = {
+        path = "/health"
+        port = "traffic-port"
+        protocol = "HTTP"
+        matcher = "200"
+      }
+      tags = {
+        Name = "Web Service"
+      }
+    },
+    {
+      name = "api"
+      protocol = "HTTP"
+      port = 3000
+      health_check = {
+        path = "/health"
+        port = "traffic-port"
+        protocol = "HTTP"
+        matcher = "200"
+      }
+      tags = {
+        Name = "API"
+      }
+    }
+  ]
+```
 
-< create a h2 chapter for each section explaining special module concepts >
-
-## Examples
-
-< if the folder `examples/` exists, put here the link to the examples subfolders with their descriptions >
+For other optional inputs, see Inputs section
 
 ## Contributing
 
