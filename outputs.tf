@@ -3,11 +3,12 @@ output "load_balancer_dns_name" {
   value       = aws_lb.app.dns_name
 }
 
-#output "load_balancer_arn_suffix" {
-#  description = "The ARN suffix of the load balancer."
-#  value       = aws_lb.app.arn_suffix
-#}
-#
+output "load_balancer_arn_suffix" {
+  description = "The ARN suffix of the load balancer."
+  value       = aws_lb.app.arn_suffix
+}
+
+
 #output "load_balancer_arn" {
 #  description = "The ARN sffix of the load balancer."
 #  value       = aws_lb.app.arn
