@@ -15,12 +15,10 @@ output "load_balancer_arn" {
 
 output "path_target_groups_arn" {
   description = "Path base routed TG arn"
-  value = {for tg in aws_lb_target_group.path: tg.name => tg.arn}
+  value       = { for tg in aws_lb_target_group.path : tg.name => tg.arn }
 }
 
 output "default_target_group_arn" {
   description = "Default TG arn"
-  value = aws_lb_target_group.default.arn
+  value       = aws_lb_target_group.default.arn
 }
-  
-

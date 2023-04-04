@@ -166,7 +166,11 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_default_target_group_arn"></a> [default\_target\_group\_arn](#output\_default\_target\_group\_arn) | Default TG arn |
+| <a name="output_load_balancer_arn"></a> [load\_balancer\_arn](#output\_load\_balancer\_arn) | The ARN of the load balancer. |
+| <a name="output_load_balancer_arn_suffix"></a> [load\_balancer\_arn\_suffix](#output\_load\_balancer\_arn\_suffix) | The ARN suffix of the load balancer. |
 | <a name="output_load_balancer_dns_name"></a> [load\_balancer\_dns\_name](#output\_load\_balancer\_dns\_name) | The DNS of the load balancer. |
+| <a name="output_path_target_groups_arn"></a> [path\_target\_groups\_arn](#output\_path\_target\_groups\_arn) | Path base routed TG arn |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors
