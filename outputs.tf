@@ -18,10 +18,10 @@ output "virtual_network_name_map_one_input" {
   value = {for tg in aws_lb_target_group.path: tg.name => tg.arn}
 }
   
-#output "target_group_arns" {
-#  description = "A list of ARNs for all target groups associated with the load balancer."
-#  value       = aws_lb_target_group.app[*].arn
-#}
+output "target_group_arns" {
+  description = "A list of ARNs for all target groups associated with the load balancer."
+  value       = aws_lb_target_group.path[*].arn
+}
 #
 #output "target_group_arns_suffix" {
 #  description = "A list of ARNs suffix for all target groups associated with the load balancer."
