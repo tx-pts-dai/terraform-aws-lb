@@ -8,11 +8,6 @@ terraform {
   }
 }
 
-
-provider "aws" {
-  region = "eu-central-1"
-}
-
 resource "aws_security_group" "alb" {
   description = "security group from internet to alb"
   vpc_id      = var.vpc_id
