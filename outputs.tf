@@ -8,13 +8,12 @@ output "load_balancer_arn_suffix" {
   value       = aws_lb.app.arn_suffix
 }
 
+output "load_balancer_arn" {
+  description = "The ARN of the load balancer."
+  value       = aws_lb.app.arn
+}
 
-#output "load_balancer_arn" {
-#  description = "The ARN sffix of the load balancer."
-#  value       = aws_lb.app.arn
-#}
-#
-#
+
 #output "target_group_arns" {
 #  description = "A list of ARNs for all target groups associated with the load balancer."
 #  value       = aws_lb_target_group.app[*].arn
