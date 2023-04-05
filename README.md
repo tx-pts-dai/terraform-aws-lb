@@ -1,6 +1,6 @@
 # terraform-aws-lb module
 
-Module for handling application load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. The name of the target group is used as the path. For example, if the target group name is `api` then it will be reachable at `hostname/api/*`, then . By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional. 
+Module for handling application load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. The name of the target group is used as the path. For example, if the target group name is `api` then it will be reachable at `hostname/api/*`, then . By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional.
 
 Security groups are handled internally and only allow http and https traffic in.
 
@@ -11,7 +11,7 @@ module "lb" {
   app_url              = "my-subdomain.domain"
   name                 = "my-deployment"
   vpc_id               = local.vpc_id
-  subnets              = data.terraform_remote_state.core_infrastructure.outputs.public_subnets.ids
+  subnets              = local.public_subnet.ids
   zone_id              = data.aws_route53_zone.my_zone.zone_id
   default_target_group = {
     name = "client"
@@ -152,7 +152,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_app_url"></a> [app\_url](#input\_app\_url) | the domain name of the Application | `string` | n/a | yes |
 | <a name="input_default_target_group"></a> [default\_target\_group](#input\_default\_target\_group) | Definition of the default target group. The one reachable by default ('/'). | <pre>object({<br>    name     = string<br>    protocol = string<br>    port     = number<br>    health_check = object({<br>      path     = string<br>      port     = string<br>      protocol = string<br>      matcher  = string<br>    })<br>    tags = map(string)<br>  })</pre> | n/a | yes |
-| <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | the S3 Bucket where to store the logs - if the bucekt name is empty logging is disabled | `string` | `""` | no |
+| <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | the existing S3 Bucket name where to store the logs - if the bucket name is empty logging is disabled | `string` | `""` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name for the load balancer. | `string` | n/a | yes |
 | <a name="input_okta_enabled"></a> [okta\_enabled](#input\_okta\_enabled) | if okta is enabled or not for the ALB | `bool` | `false` | no |
 | <a name="input_path_target_groups"></a> [path\_target\_groups](#input\_path\_target\_groups) | Definition of the target groups. Each target group is accessed via path based routing. | <pre>list(object({<br>    name     = string<br>    protocol = string<br>    port     = number<br>    health_check = object({<br>      path     = string<br>      port     = string<br>      protocol = string<br>      matcher  = string<br>    })<br>    tags = map(string)<br>  }))</pre> | n/a | yes |
@@ -171,6 +171,7 @@ No modules.
 | <a name="output_load_balancer_arn_suffix"></a> [load\_balancer\_arn\_suffix](#output\_load\_balancer\_arn\_suffix) | The ARN suffix of the load balancer. |
 | <a name="output_load_balancer_dns_name"></a> [load\_balancer\_dns\_name](#output\_load\_balancer\_dns\_name) | The DNS of the load balancer. |
 | <a name="output_path_target_groups_arn"></a> [path\_target\_groups\_arn](#output\_path\_target\_groups\_arn) | Path base routed TG arn |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The security group ID linked to the load balancer |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors
