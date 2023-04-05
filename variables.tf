@@ -74,7 +74,7 @@ variable "secret_name" {
 }
 
 variable "log_bucket" {
-  description = "the S3 Bucket where to store the logs - if the bucekt name is empty logging is disabled "
+  description = "the existing S3 Bucket name where to store the logs - if the bucket name is empty logging is disabled "
   type        = string
   default     = ""
 }
