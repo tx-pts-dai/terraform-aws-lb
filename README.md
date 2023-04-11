@@ -1,50 +1,93 @@
-# < This section can be removed >
+# terraform-aws-lb module
 
-Official doc for public modules [hashicorp](https://developer.hashicorp.com/terraform/registry/modules/publish)
+Module for handling application load balancers, listeners, target groups and route53 records creation. It also handles SSL certificates validation through DNS. Besides the default target group, multiple target groups can be reached through path based routing from the same load balancer. The name of the target group is used as the path. For example, if the target group name is `api` then it will be reachable at `hostname/api/*`, then . By default, all http traffic is redirected to https. The load balancer is also protected via Okta as optional.
 
-Repo structure:
-
-```
-├── README.md
-├── main.tf
-├── variables.tf
-├── outputs.tf
-├── ...
-├── modules/
-│   ├── nestedA/
-│   │   ├── README.md
-│   │   ├── variables.tf
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   ├── nestedB/
-│   ├── .../
-├── examples/
-│   ├── exampleA/
-│   │   ├── main.tf
-│   ├── exampleB/
-│   ├── .../
-```
-
-# My Terraform Module
-
-< module description >
+Security groups are handled internally and only allow http and https traffic in.
 
 ## Usage
-
-< describe the module minimal code required for a deployment >
-
 ```hcl
-module "my_module_example" {
+module "lb" {
+  source               = "github.com/tx-pts-dai/terraform-aws-lb"
+  app_url              = "my-subdomain.domain"
+  name                 = "my-deployment"
+  vpc_id               = local.vpc_id
+  subnets              = local.public_subnet.ids
+  zone_id              = data.aws_route53_zone.my_zone.zone_id
+  default_target_group = {
+    name = "client"
+    protocol = "HTTP"
+    port = 80
+    health_check = {
+      path = "/health"
+      port = "traffic-port"
+      protocol = "HTTP"
+      matcher = "200"
+    }
+    tags = {
+      Name = "Client"
+    }
+  }
 }
 ```
 
-## Explanation and description of interesting use-cases
+As optional, extra target groups can be set. Those could be then reached through path based routing. Each target group must specify the following properties. As optional, they can have dedicated tags.
+```hcl
+module "lb" {
+  source               = "github.com/tx-pts-dai/terraform-aws-lb"
+  ...
+  path_target_groups   = [
+    {
+      name = "ws"
+      protocol = "HTTP"
+      port = 3000
+      health_check = {
+        path = "/health"
+        port = "traffic-port"
+        protocol = "HTTP"
+        matcher = "200"
+      }
+      tags = {
+        Name = "Web Service"
+      }
+    },
+    {
+      name = "api"
+      protocol = "HTTP"
+      port = 3000
+      health_check = {
+        path = "/health"
+        port = "traffic-port"
+        protocol = "HTTP"
+        matcher = "200"
+      }
+      tags = {
+        Name = "API"
+      }
+    }
+  ]
+}
+```
 
-< create a h2 chapter for each section explaining special module concepts >
+For other optional inputs, see Inputs section
 
-## Examples
+## Enabling logging
+ALB logs can be enabled by setting the following input:
+```hcl
+  "log_bucket" = "arn-of-an-existing-bucket"
+```
+When empty, there are no logs saved.
 
-< if the folder `examples/` exists, put here the link to the examples subfolders with their descriptions >
+## Enabling OKTA
+OKTA can be enabled with the following inputs:
+```hcl
+  okta_enabled = true
+  secret_name  = "aws-secret-name"
+```
+
+The secret is a JSON key-value pair that must contain the following keys:
+- okta_client_id
+- okta_client_secret
+- okta_login_url
 
 ## Contributing
 
@@ -77,7 +120,9 @@ as described in the `.pre-commit-config.yaml` file
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
 
 ## Modules
 
@@ -85,15 +130,48 @@ No modules.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [aws_acm_certificate.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate) | resource |
+| [aws_acm_certificate_validation.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate_validation) | resource |
+| [aws_lb.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
+| [aws_lb_listener.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_listener.https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_listener_rule.https_listener_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule) | resource |
+| [aws_lb_target_group.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
+| [aws_lb_target_group.path](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
+| [aws_route53_record.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.app_ssl_validation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_security_group.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_secretsmanager_secret.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret) | data source |
+| [aws_secretsmanager_secret_version.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret_version) | data source |
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_app_url"></a> [app\_url](#input\_app\_url) | the domain name of the Application | `string` | n/a | yes |
+| <a name="input_default_target_group"></a> [default\_target\_group](#input\_default\_target\_group) | Definition of the default target group. The one reachable by default ('/'). | <pre>object({<br>    name     = string<br>    protocol = string<br>    port     = number<br>    health_check = object({<br>      path     = string<br>      port     = string<br>      protocol = string<br>      matcher  = string<br>    })<br>    tags = map(string)<br>  })</pre> | n/a | yes |
+| <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | the existing S3 Bucket name where to store the logs - if the bucket name is empty logging is disabled | `string` | `""` | no |
+| <a name="input_name"></a> [name](#input\_name) | The name for the load balancer. | `string` | n/a | yes |
+| <a name="input_okta_enabled"></a> [okta\_enabled](#input\_okta\_enabled) | if okta is enabled or not for the ALB | `bool` | `false` | no |
+| <a name="input_path_target_groups"></a> [path\_target\_groups](#input\_path\_target\_groups) | Definition of the target groups. Each target group is accessed via path based routing. | <pre>list(object({<br>    name     = string<br>    protocol = string<br>    port     = number<br>    health_check = object({<br>      path     = string<br>      port     = string<br>      protocol = string<br>      matcher  = string<br>    })<br>    tags = map(string)<br>  }))</pre> | n/a | yes |
+| <a name="input_secret_name"></a> [secret\_name](#input\_secret\_name) | the AWS Secret manager Secret name of the Secret where okta id and okta secret are stored. They should be stored as okta\_client\_id and okta\_client\_secret key | `string` | `""` | no |
+| <a name="input_subnets"></a> [subnets](#input\_subnets) | A list of public subnet IDs for the load balancer. | `list(string)` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to apply to the load balancer and associated resources. | `map(string)` | n/a | yes |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC in which to create the load balancer. | `string` | n/a | yes |
+| <a name="input_zone_id"></a> [zone\_id](#input\_zone\_id) | the Route 53 zone id | `string` | n/a | yes |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_default_target_group_arn"></a> [default\_target\_group\_arn](#output\_default\_target\_group\_arn) | Default TG arn |
+| <a name="output_load_balancer_arn"></a> [load\_balancer\_arn](#output\_load\_balancer\_arn) | The ARN of the load balancer. |
+| <a name="output_load_balancer_arn_suffix"></a> [load\_balancer\_arn\_suffix](#output\_load\_balancer\_arn\_suffix) | The ARN suffix of the load balancer. |
+| <a name="output_load_balancer_dns_name"></a> [load\_balancer\_dns\_name](#output\_load\_balancer\_dns\_name) | The DNS of the load balancer. |
+| <a name="output_path_target_groups_arn"></a> [path\_target\_groups\_arn](#output\_path\_target\_groups\_arn) | Path base routed TG arn |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The security group ID linked to the load balancer |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors
