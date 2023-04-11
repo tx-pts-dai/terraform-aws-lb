@@ -7,13 +7,13 @@ variable "path_target_groups" {
   description = "Definition of the target groups. Each target group is accessed via path based routing."
   type = list(object({
     name     = string
-    protocol = string
+    protocol = optional(string, "HTTP")
     port     = number
     health_check = object({
-      path     = string
-      port     = string
-      protocol = string
-      matcher  = string
+      path     = optional(string, "/health")
+      port     = optional(string, "traffic-port")
+      protocol = optional(string, "HTTP")
+      matcher  = optional(string, "200")
     })
     tags = map(string)
   }))
@@ -24,13 +24,13 @@ variable "default_target_group" {
   description = "Definition of the default target group. The one reachable by default ('/')."
   type = object({
     name     = string
-    protocol = string
+    protocol = optional(string, "HTTP")
     port     = number
     health_check = object({
-      path     = string
-      port     = string
-      protocol = string
-      matcher  = string
+      path     = optional(string, "/health")
+      port     = optional(string, "traffic-port")
+      protocol = optional(string, "HTTP")
+      matcher  = optional(string, "200")
     })
     tags = map(string)
   })
