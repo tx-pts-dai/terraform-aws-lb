@@ -9,11 +9,16 @@ variable "path_target_groups" {
     name     = string
     protocol = optional(string, "HTTP")
     port     = number
-    health_check = object({
+    health_check = optional(object({
       path     = optional(string, "/health")
       port     = optional(string, "traffic-port")
       protocol = optional(string, "HTTP")
       matcher  = optional(string, "200")
+      }), {
+      path     = "/health"
+      port     = "traffic-port"
+      protocol = "HTTP"
+      matcher  = "200"
     })
     tags = map(string)
   }))
@@ -26,11 +31,16 @@ variable "default_target_group" {
     name     = string
     protocol = optional(string, "HTTP")
     port     = number
-    health_check = object({
+    health_check = optional(object({
       path     = optional(string, "/health")
       port     = optional(string, "traffic-port")
       protocol = optional(string, "HTTP")
       matcher  = optional(string, "200")
+      }), {
+      path     = "/health"
+      port     = "traffic-port"
+      protocol = "HTTP"
+      matcher  = "200"
     })
     tags = map(string)
   })
