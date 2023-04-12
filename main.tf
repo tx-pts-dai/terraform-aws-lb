@@ -160,7 +160,7 @@ resource "aws_lb_listener_rule" "https_listener_rule" {
 
   condition {
     path_pattern {
-      values = ["/${each.value.name}/*"]
+      values = each.value.paths
     }
   }
 }

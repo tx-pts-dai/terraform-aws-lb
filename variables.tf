@@ -8,20 +8,18 @@ variable "path_target_groups" {
   type = list(object({
     name     = string
     protocol = optional(string, "HTTP")
+    paths    = list(string)
     port     = number
-    health_check = optional(object({
-      path     = optional(string, "/health")
+    health_check = object({
+      path     = string
       port     = optional(string, "traffic-port")
       protocol = optional(string, "HTTP")
       matcher  = optional(string, "200")
-      }), {
-      path     = "/health"
-      port     = "traffic-port"
-      protocol = "HTTP"
-      matcher  = "200"
     })
     tags = map(string)
   }))
+
+  # TODO: validation {} block for 'paths' to have length > 0
 }
 
 
@@ -31,16 +29,11 @@ variable "default_target_group" {
     name     = string
     protocol = optional(string, "HTTP")
     port     = number
-    health_check = optional(object({
-      path     = optional(string, "/health")
+    health_check = object({
+      path     = string
       port     = optional(string, "traffic-port")
       protocol = optional(string, "HTTP")
       matcher  = optional(string, "200")
-      }), {
-      path     = "/health"
-      port     = "traffic-port"
-      protocol = "HTTP"
-      matcher  = "200"
     })
     tags = map(string)
   })
