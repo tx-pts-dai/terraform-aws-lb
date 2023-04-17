@@ -99,13 +99,13 @@ The secret is a JSON key-value pair that must contain the following keys:
 
 ## DNS
 
-The A and CNAME DNS records for the loadbalancer and the AWS certificate validation will automatically be created by giving the AWS Route53 ZoneID were too create them:
+The A and CNAME DNS records for the loadbalancer and the AWS certificate validation will automatically be created by giving the AWS Route53 ZoneID were to create them:
 
 ```hcl
   zone_id = "AWS_ROUTER53_ZONEID"
 ```
 
-Otherwise, the following records need to be set in the DNS zone:
+If the worlflow doesn't have permissions to the AWS Route53 Zone OR if the zone is not managed by Route53 (Cloudflare for example), then the *zone_id* parameter should be "" and the following records need to be created manually:
 
 - CNAME to the loadbalancer (to have a "nice" name for the service)
 - CNAME for the AWS Certificate validation
@@ -181,7 +181,7 @@ No modules.
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | A list of public subnet IDs for the load balancer. | `list(string)` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to apply to the load balancer and associated resources. | `map(string)` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC in which to create the load balancer. | `string` | n/a | yes |
-| <a name="input_zone_id"></a> [zone\_id](#input\_zone\_id) | the Route 53 zone id | `string` | n/a | yes |
+| <a name="input_zone_id"></a> [zone\_id](#input\_zone\_id) | If set, the Route 53 zone id into which the DNS records will be created | `string` | `""` | no |
 
 ## Outputs
 
