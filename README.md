@@ -5,6 +5,7 @@ Module for handling application load balancers, listeners, target groups and rou
 Security groups are handled internally and only allow http and https traffic in.
 
 ## Usage
+
 ```hcl
 module "lb" {
   source               = "github.com/tx-pts-dai/terraform-aws-lb"
@@ -31,6 +32,7 @@ module "lb" {
 ```
 
 As optional, extra target groups can be set. Those could be then reached through path based routing. Each target group must specify the following properties. As optional, they can have dedicated tags and health checks properties.
+
 ```hcl
 module "lb" {
   source               = "github.com/tx-pts-dai/terraform-aws-lb"
@@ -71,23 +73,42 @@ module "lb" {
 For other optional inputs, see Inputs section
 
 ## Enabling logging
+
 ALB logs can be enabled by setting the following input:
+
 ```hcl
   "log_bucket" = "arn-of-an-existing-bucket"
 ```
+
 When empty, there are no logs saved.
 
 ## Enabling OKTA
+
 OKTA can be enabled with the following inputs:
+
 ```hcl
   okta_enabled = true
   secret_name  = "aws-secret-name"
 ```
 
 The secret is a JSON key-value pair that must contain the following keys:
+
 - okta_client_id
 - okta_client_secret
 - okta_login_url
+
+## DNS
+
+The A and CNAME DNS records for the loadbalancer and the AWS certificate validation will automatically be created by giving the AWS Route53 ZoneID were too create them:
+
+```hcl
+  zone_id = "AWS_ROUTER53_ZONEID"
+```
+
+Otherwise, the following records need to be set in the DNS zone:
+
+- CNAME to the loadbalancer (to have a "nice" name for the service)
+- CNAME for the AWS Certificate validation
 
 ## Contributing
 

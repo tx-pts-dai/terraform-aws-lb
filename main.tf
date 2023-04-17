@@ -36,6 +36,8 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_route53_record" "app" {
+  count = var.zone_id != "" ? 1 : 0
+
   zone_id = var.zone_id
   name    = var.app_url
   type    = "A"
@@ -175,6 +177,8 @@ resource "aws_acm_certificate" "app" {
 }
 
 resource "aws_route53_record" "app_ssl_validation" {
+  count = var.zone_id != "" ? 1 : 0
+
   allow_overwrite = true
   name            = tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_name
   records         = [tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_value]
@@ -184,6 +188,8 @@ resource "aws_route53_record" "app_ssl_validation" {
 }
 
 resource "aws_acm_certificate_validation" "app" {
+  count = var.zone_id != "" ? 1 : 0
+
   certificate_arn         = aws_acm_certificate.app.arn
-  validation_record_fqdns = [aws_route53_record.app_ssl_validation.fqdn]
+  validation_record_fqdns = [aws_route53_record.app_ssl_validation[0].fqdn]
 }
