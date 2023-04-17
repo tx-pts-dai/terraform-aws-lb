@@ -60,8 +60,9 @@ variable "app_url" {
 }
 
 variable "zone_id" {
-  description = "the Route 53 zone id"
+  description = "If set, the Route 53 zone id into which the DNS records will be created"
   type        = string
+  default     = ""
 }
 
 variable "okta_enabled" {
