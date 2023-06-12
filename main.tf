@@ -15,7 +15,7 @@ moved {
 
 moved {
   from = aws_alb_listener.https
-  to   = aws_alb_listener.https
+  to   = aws_lb_listener.https
 }
 
 moved {
