@@ -22,6 +22,11 @@ output "default_target_group_arn" {
   description = "Default TG arn"
   value       = aws_lb_target_group.default.arn
 }
+  
+output "default_target_group_arn_suffix" {
+  description = "Default TG arn"
+  value       = aws_lb_target_group.default.arn_suffix 
+}
 
 output "security_group_id" {
   description = "The security group ID linked to the load balancer"
