@@ -8,6 +8,26 @@ terraform {
   }
 }
 
+moved {
+  from = aws_alb.app
+  to   = aws_lb.app
+}
+
+moved {
+  from = aws_alb_listener.https
+  to   = aws_alb_listener.https
+}
+
+moved {
+  from = aws_alb_listener.https_redirect
+  to   = aws_lb_listener.http
+}
+
+moved {
+  from = aws_alb_target_group.app
+  to   = aws_lb_target_group.default
+}
+
 resource "aws_security_group" "alb" {
   description = "security group from internet to alb"
   vpc_id      = var.vpc_id
