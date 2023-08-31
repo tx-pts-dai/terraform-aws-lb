@@ -173,6 +173,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_app_url"></a> [app\_url](#input\_app\_url) | the domain name of the Application | `string` | n/a | yes |
 | <a name="input_default_target_group"></a> [default\_target\_group](#input\_default\_target\_group) | Definition of the default target group. The one reachable by default ('/'). | <pre>object({<br>    name     = string<br>    protocol = optional(string, "HTTP")<br>    port     = number<br>    health_check = object({<br>      path     = string<br>      port     = optional(string, "traffic-port")<br>      protocol = optional(string, "HTTP")<br>      matcher  = optional(string, "200")<br>    })<br>    tags = map(string)<br>  })</pre> | n/a | yes |
+| <a name="input_lb_idle_timeout_in_seconds"></a> [lb\_idle\_timeout\_in\_seconds](#input\_lb\_idle\_timeout\_in\_seconds) | the connection idle timeout of the application load balancer (between 1 and 4000) | `number` | `60` | no |
 | <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | the existing S3 Bucket name where to store the logs - if the bucket name is empty logging is disabled | `string` | `""` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name for the load balancer. | `string` | n/a | yes |
 | <a name="input_okta_enabled"></a> [okta\_enabled](#input\_okta\_enabled) | if okta is enabled or not for the ALB | `bool` | `false` | no |
