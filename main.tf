@@ -100,6 +100,7 @@ resource "aws_lb" "app" {
   subnets            = var.subnets
   security_groups    = [aws_security_group.alb.id]
   tags               = var.tags
+  idle_timeout       = var.lb_idle_timeout_in_seconds
   access_logs {
     bucket  = var.log_bucket
     prefix  = "alb-${var.name}"

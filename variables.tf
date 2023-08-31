@@ -83,6 +83,11 @@ variable "log_bucket" {
   default     = ""
 }
 
+variable "lb_idle_timeout_in_seconds" {
+  description = "the connection idle timeout of the application load balancer (between 1 and 4000)"
+  type        = number
+  default     = 60
+}
 /*
   target_groups = [
     {
