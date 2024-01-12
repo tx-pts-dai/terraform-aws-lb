@@ -9,7 +9,7 @@ terraform {
 }
 
 locals {
-  okta_config = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)
+  okta_config = (var.okta.enabled) ? jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string) : {}
 }
 
 resource "aws_security_group" "alb" {
