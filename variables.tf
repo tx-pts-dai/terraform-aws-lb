@@ -86,8 +86,8 @@ variable "okta" {
   default = {}
 
   validation {
-    condition     = var.okta.enabled && length(var.okta.aws_secret_name) > 0
-    error_message = "If Okta is enabled you have to specify 'aws_secret_name' where to get the Okta configuration."
+    condition     = !var.okta.enabled || (var.okta.enabled && length(var.okta.aws_secret_name) > 0)
+    error_message = "If Okta is enabled, then you have to specify 'aws_secret_name' where to get the Okta configuration."
   }
 }
 
