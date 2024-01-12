@@ -78,7 +78,7 @@ variable "create_certificate_validation_dns_record" {
 }
 
 variable "okta" {
-  description = "Integrate Okta directly at the ALB level. 'aws_secret_name' is the name of the secret where 'okta_client_id' and 'okta_client_secret' are stored."
+  description = "Integrate Okta directly at the ALB level. 'aws_secret_name' is the name of the secret where 'okta_client_id', 'okta_client_secret' and 'okta_login_url' are set."
   type = object({
     enabled         = optional(bool, false)
     aws_secret_name = optional(string, "")
