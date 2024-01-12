@@ -65,16 +65,25 @@ variable "zone_id" {
   default     = ""
 }
 
-variable "okta_enabled" {
-  description = "if okta is enabled or not for the ALB"
+variable "create_lb_dns_record" {
+  description = "Whether to create the DNS record pointing from 'app_url' to the LB-created DNS name."
   type        = bool
   default     = false
 }
 
-variable "secret_name" {
-  description = "the AWS Secret manager Secret name of the Secret where okta id and okta secret are stored. They should be stored as okta_client_id and okta_client_secret key"
-  type        = string
-  default     = ""
+variable "create_certificate_validation_dns_record" {
+  description = "Whether to create the DNS record to validate the custom certificate being created by the module."
+  type        = bool
+  default     = true
+}
+
+variable "okta" {
+  description = "Integrate Okta directly at the ALB level. 'aws_secret_name' is the name of the secret where 'okta_client_id' and 'okta_client_secret' are stored."
+  type = object({
+    enabled         = optional(bool, false)
+    aws_secret_name = optional(string, "")
+  })
+  default = {}
 }
 
 variable "log_bucket" {
