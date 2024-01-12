@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+locals {
+  okta_config = (var.okta.enabled) ? jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string) : {}
+}
+
 resource "aws_security_group" "alb" {
   description = "security group from internet to alb"
   vpc_id      = var.vpc_id
@@ -36,11 +40,12 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_route53_record" "app" {
-  count = var.zone_id != "" ? 1 : 0
+  count = var.zone_id != "" && var.create_lb_dns_record ? 1 : 0
 
   zone_id = var.zone_id
   name    = var.app_url
   type    = "A"
+
   alias {
     name                   = aws_lb.app.dns_name
     zone_id                = aws_lb.app.zone_id
@@ -49,11 +54,11 @@ resource "aws_route53_record" "app" {
 }
 
 data "aws_secretsmanager_secret" "app" {
-  count = var.okta_enabled ? 1 : 0
-  name  = var.secret_name
+  count = var.okta.enabled ? 1 : 0
+  name  = var.okta.aws_secret_name
 }
 data "aws_secretsmanager_secret_version" "app" {
-  count     = var.okta_enabled ? 1 : 0
+  count     = var.okta.enabled ? 1 : 0
   secret_id = data.aws_secretsmanager_secret.app[count.index].id
 }
 
@@ -129,16 +134,16 @@ resource "aws_lb_listener" "https" {
   certificate_arn   = aws_acm_certificate.app.arn
 
   dynamic "default_action" {
-    for_each = var.okta_enabled ? [1] : []
+    for_each = var.okta.enabled ? [1] : []
     content {
       type = "authenticate-oidc"
       authenticate_oidc {
         authorization_endpoint     = "https://login.tx.group/oauth2/v1/authorize"
-        client_id                  = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_client_id"]
-        client_secret              = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_client_secret"]
-        issuer                     = jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_login_url"]
-        token_endpoint             = "${jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_login_url"]}/oauth2/v1/token"
-        user_info_endpoint         = "${jsondecode(data.aws_secretsmanager_secret_version.app[0].secret_string)["okta_login_url"]}/oauth2/v1/userinfo"
+        client_id                  = local.okta_config["okta_client_id"]
+        client_secret              = local.okta_config["okta_client_secret"]
+        issuer                     = local.okta_config["okta_login_url"]
+        token_endpoint             = "${local.okta_config["okta_login_url"]}/oauth2/v1/token"
+        user_info_endpoint         = "${local.okta_config["okta_login_url"]}/oauth2/v1/userinfo"
         session_cookie_name        = "AWSELBAuthSessionCookie"
         session_timeout            = "3600"
         scope                      = "openid"
@@ -178,7 +183,7 @@ resource "aws_acm_certificate" "app" {
 }
 
 resource "aws_route53_record" "app_ssl_validation" {
-  count = var.zone_id != "" ? 1 : 0
+  count = var.zone_id != "" && var.create_certificate_validation_dns_record ? 1 : 0
 
   allow_overwrite = true
   name            = tolist(aws_acm_certificate.app.domain_validation_options)[0].resource_record_name
@@ -189,7 +194,7 @@ resource "aws_route53_record" "app_ssl_validation" {
 }
 
 resource "aws_acm_certificate_validation" "app" {
-  count = var.zone_id != "" ? 1 : 0
+  count = var.zone_id != "" && var.create_certificate_validation_dns_record ? 1 : 0
 
   certificate_arn         = aws_acm_certificate.app.arn
   validation_record_fqdns = [aws_route53_record.app_ssl_validation[0].fqdn]
