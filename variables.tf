@@ -60,13 +60,13 @@ variable "app_url" {
 }
 
 variable "zone_id" {
-  description = "If set, the Route 53 zone id into which the DNS records will be created"
+  description = "If set, the Route 53 zone id into which the DNS records will be created. 'var.zone_id' must be set."
   type        = string
   default     = ""
 }
 
 variable "create_lb_dns_record" {
-  description = "Whether to create the DNS record pointing from 'app_url' to the LB-created DNS name."
+  description = "Whether to create the DNS record pointing from 'app_url' to the LB-created DNS name. 'var.zone_id' must be set."
   type        = bool
   default     = false
 }
