@@ -87,8 +87,10 @@ When empty, there are no logs saved.
 OKTA can be enabled with the following inputs:
 
 ```hcl
-  okta_enabled = true
-  secret_name  = "aws-secret-name"
+  okta = {
+    enabled         = true
+    aws_secret_name = "aws-secret-name"
+  }
 ```
 
 The secret is a JSON key-value pair that must contain the following keys:
