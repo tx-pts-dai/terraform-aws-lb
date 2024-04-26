@@ -82,6 +82,7 @@ variable "okta" {
   type = object({
     enabled         = optional(bool, false)
     aws_secret_name = optional(string, "")
+    scope           = optional(string, "openid")
   })
   default = {}
 
