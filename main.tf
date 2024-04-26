@@ -146,7 +146,7 @@ resource "aws_lb_listener" "https" {
         user_info_endpoint         = "${local.okta_config["okta_login_url"]}/oauth2/v1/userinfo"
         session_cookie_name        = "AWSELBAuthSessionCookie"
         session_timeout            = "3600"
-        scope                      = var.okta.scope
+        scope                      = join(" ", var.okta.scopes)
         on_unauthenticated_request = "authenticate"
       }
     }
