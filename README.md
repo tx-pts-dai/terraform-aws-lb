@@ -90,7 +90,7 @@ OKTA can be enabled with the following inputs:
   okta = {
     enabled         = true
     aws_secret_name = "aws-secret-name"
-    scopes          = ["openid", "group"]
+    scopes          = ["openid", "groups"]
   }
 ```
 
