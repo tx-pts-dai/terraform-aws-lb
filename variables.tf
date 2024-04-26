@@ -60,21 +60,36 @@ variable "app_url" {
 }
 
 variable "zone_id" {
-  description = "If set, the Route 53 zone id into which the DNS records will be created"
+  description = "If set, the Route 53 zone id into which the DNS records will be created. 'var.zone_id' must be set."
   type        = string
   default     = ""
 }
 
-variable "okta_enabled" {
-  description = "if okta is enabled or not for the ALB"
+variable "create_lb_dns_record" {
+  description = "Whether to create the DNS record pointing from 'app_url' to the LB-created DNS name. 'var.zone_id' must be set."
   type        = bool
   default     = false
 }
 
-variable "secret_name" {
-  description = "the AWS Secret manager Secret name of the Secret where okta id and okta secret are stored. They should be stored as okta_client_id and okta_client_secret key"
-  type        = string
-  default     = ""
+variable "create_certificate_validation_dns_record" {
+  description = "Whether to create the DNS record to validate the custom certificate being created by the module."
+  type        = bool
+  default     = true
+}
+
+variable "okta" {
+  description = "Integrate Okta directly at the ALB level. 'aws_secret_name' is the name of the secret where 'okta_client_id', 'okta_client_secret' and 'okta_login_url' are set."
+  type = object({
+    enabled         = optional(bool, false)
+    aws_secret_name = optional(string, "")
+    scopes          = optional(list(string), ["openid"])
+  })
+  default = {}
+
+  validation {
+    condition     = !var.okta.enabled || (var.okta.enabled && length(var.okta.aws_secret_name) > 0)
+    error_message = "If Okta is enabled, then you have to specify 'aws_secret_name' where to get the Okta configuration."
+  }
 }
 
 variable "log_bucket" {
@@ -83,6 +98,11 @@ variable "log_bucket" {
   default     = ""
 }
 
+variable "lb_idle_timeout_in_seconds" {
+  description = "the connection idle timeout of the application load balancer (between 1 and 4000)"
+  type        = number
+  default     = 60
+}
 /*
   target_groups = [
     {
