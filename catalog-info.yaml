@@ -1,0 +1,68 @@
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-load-balancer
+  title: Create a load balancer
+  description: Template to create a load balancer in a PR to an existing repository.
+spec:
+  owner: roadie
+  type: service
+
+  parameters:
+    - title: Choose a location for your new repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - tx-pts-dai
+              - DND-IT
+    - title: PR Data
+      properties:
+        pr_branch:
+          title: PR Branch
+          type: string
+          description: The new branch to make a PR from
+
+  steps:
+    - id: fetch-repo
+      name: Fetch repo
+      action: fetch:plain
+      input:
+        url: ${{ parameters.repoUrl }}
+    - id: fetch-terraform-module
+      name: Fetch terraform module
+      action: fetch:template
+      input:
+        url: https://github.com/tx-pts-dai/terraform-aws-lb?ref=v0.3.0
+        targetPath: ${{ parameters.terraformDefinitionsPath }}
+        templateFileExtension: true
+        values:
+          dns_zone_id: test.tamedia.ch
+    - id: move-terraform-module
+      name: Move terraform module
+      action: move
+      input:
+        files:
+          - from: ${{ parameters.terraformDefinitionsPath }}/backstage/minimal.tf.njk # 'backstage' is a convention for the directory where the backstage sources are stored in the repos
+            to: ${{ parameters.terraformDefinitionsPath }}/load-balancer.tf # TODO: check for existence of this file in the repo
+    - id: publish-pr
+      name: Publish PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=${{ (parameters.repoUrl | parseRepoUrl).repo }}&owner=${{ (parameters.repoUrl | parseRepoUrl).org }}
+        branchName: ${{ parameters.pr_branch }}
+        title: Add entity to ${{ parameters.path }}
+        description: PR created from Roadie Backstage scaffolder
+    - id: log-message
+      name: Log PR URL
+      action: debug:log
+      input:
+        message: 'PR url: ${{ steps["publish-pr"].output.remoteUrl }}'
