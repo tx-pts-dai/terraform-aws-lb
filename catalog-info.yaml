@@ -52,7 +52,7 @@ spec:
           dns_zone_id: test.tamedia.ch
     - id: move-terraform-module
       name: Move terraform module
-      action: move
+      action: fs:rename
       input:
         files:
           - from: ${{ parameters.terraform_dir }}/backstage/minimal.tf.njk # 'backstage' is a convention for the directory where the backstage sources are stored in the repos
