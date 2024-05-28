@@ -47,6 +47,7 @@ variable "subnets" {
 variable "tags" {
   description = "A map of tags to apply to the load balancer and associated resources."
   type        = map(string)
+  default     = {}
 }
 
 variable "vpc_id" {
