@@ -10,7 +10,7 @@ spec:
   type: service
 
   parameters:
-    - title: Choose a location for your new repository
+    - title: Select repository to which the load balancer should be added
       required:
         - repoUrl
       properties:
@@ -30,6 +30,10 @@ spec:
           title: PR Branch
           type: string
           description: The new branch to make a PR from
+        terraform_dir:
+          title: Terraform directory
+          type: string
+          description: The path to the directory containing Terraform definitions. Usually 'deploy/infrastructure'
 
   steps:
     - id: fetch-repo
@@ -42,7 +46,7 @@ spec:
       action: fetch:template
       input:
         url: https://github.com/tx-pts-dai/terraform-aws-lb?ref=v0.3.0
-        targetPath: ${{ parameters.terraformDefinitionsPath }}
+        targetPath: ${{ parameters.terraform_dir }}
         templateFileExtension: true
         values:
           dns_zone_id: test.tamedia.ch
@@ -51,15 +55,15 @@ spec:
       action: move
       input:
         files:
-          - from: ${{ parameters.terraformDefinitionsPath }}/backstage/minimal.tf.njk # 'backstage' is a convention for the directory where the backstage sources are stored in the repos
-            to: ${{ parameters.terraformDefinitionsPath }}/load-balancer.tf # TODO: check for existence of this file in the repo
+          - from: ${{ parameters.terraform_dir }}/backstage/minimal.tf.njk # 'backstage' is a convention for the directory where the backstage sources are stored in the repos
+            to: ${{ parameters.terraform_dir }}/load-balancer.tf # TODO: check for existence of this file in the repo
     - id: publish-pr
       name: Publish PR
       action: publish:github:pull-request
       input:
         repoUrl: github.com?repo=${{ (parameters.repoUrl | parseRepoUrl).repo }}&owner=${{ (parameters.repoUrl | parseRepoUrl).org }}
         branchName: ${{ parameters.pr_branch }}
-        title: Add entity to ${{ parameters.path }}
+        title: Add Load Balancer
         description: PR created from Roadie Backstage scaffolder
     - id: log-message
       name: Log PR URL
