@@ -33,7 +33,8 @@ spec:
         terraform_dir:
           title: Terraform directory
           type: string
-          description: The path to the directory containing Terraform definitions. Usually 'deploy/infrastructure'
+          description: The path to the directory containing Terraform definitions.
+          default: deploy/infrastructure
 
   steps:
     - id: fetch-repo
@@ -45,7 +46,7 @@ spec:
       name: Fetch terraform module
       action: fetch:template
       input:
-        url: https://github.com/tx-pts-dai/terraform-aws-lb?ref=v0.3.0
+        url: https://github.com/tx-pts-dai/terraform-aws-lb?ref=FUM-3051-add-backstage-support
         targetPath: ${{ parameters.terraform_dir }}
         templateFileExtension: true
         values:
