@@ -1,0 +1,73 @@
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-load-balancer
+  title: Create a load balancer
+  description: Template to create a load balancer in a PR to an existing repository.
+spec:
+  owner: roadie
+  type: service
+
+  parameters:
+    - title: Select repository to which the load balancer should be added
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - DND-IT
+              - tx-pts-dai
+    - title: PR Data
+      properties:
+        pr_branch:
+          title: PR Branch
+          type: string
+          description: The new branch to make a PR from
+        terraform_dir:
+          title: Terraform directory
+          type: string
+          description: The path to the directory containing Terraform definitions.
+          default: deploy/infrastructure
+
+  steps:
+    - id: fetch-repo
+      name: Fetch repo
+      action: fetch:plain
+      input:
+        url: ${{ parameters.repoUrl }}
+    - id: fetch-terraform-module
+      name: Fetch terraform module
+      action: fetch:template
+      input:
+        url: https://github.com/tx-pts-dai/terraform-aws-lb/tree/FUM-3051-add-backstage-support/backstage
+        targetPath: ${{ parameters.terraform_dir }}
+        templateFileExtension: true
+        values:
+          dns_zone_id: test.tamedia.ch
+    # - id: move-terraform-module
+    #   name: Move terraform module
+    #   action: fs:rename
+    #   input:
+    #     files:
+    #       - from: ${{ parameters.terraform_dir }}/backstage/minimal.tf.njk # 'backstage' is a convention for the directory where the backstage sources are stored in the repos
+    #         to: ${{ parameters.terraform_dir }}/load-balancer.tf # TODO: check for existence of this file in the repo
+    - id: publish-pr
+      name: Publish PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=${{ (parameters.repoUrl | parseRepoUrl).repo }}&owner=${{ (parameters.repoUrl | parseRepoUrl).owner }}
+        branchName: ${{ parameters.pr_branch }}
+        title: Add Load Balancer
+        description: PR created from Roadie Backstage scaffolder
+    - id: log-message
+      name: Log PR URL
+      action: debug:log
+      input:
+        message: 'PR url: ${{ steps["publish-pr"].output.remoteUrl }}'

@@ -1,0 +1,21 @@
+data "aws_route53_zone" "examples" {
+  zone_id = "${{ values.dns_zone_id }}"
+}
+
+module "lb" {
+  source  = "tx-pts-dai/lb/aws"
+  version = "0.3.0"
+  
+  name                       = "foo-bar-lb"
+  vpc_id                     = local.vpc_id
+  subnets                    = local.public_subnets
+  app_url                    = var.urls.backend
+  zone_id                    = data.aws_route53_zone.this[0].zone_id
+  default_target_group       = local.default_target_group
+
+  path_target_groups = []
+
+  tags = {
+    Environment = title(var.environment)
+  }
+}
