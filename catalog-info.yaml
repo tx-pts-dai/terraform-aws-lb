@@ -62,7 +62,7 @@ spec:
       name: Publish PR
       action: publish:github:pull-request
       input:
-        repoUrl: github.com?repo=${{ (parameters.repoUrl | parseRepoUrl).repo }}&owner=${{ (parameters.repoUrl | parseRepoUrl).org }}
+        repoUrl: github.com?repo=${{ (parameters.repoUrl | parseRepoUrl).repo }}&owner=${{ (parameters.repoUrl | parseRepoUrl).owner }}
         branchName: ${{ parameters.pr_branch }}
         title: Add Load Balancer
         description: PR created from Roadie Backstage scaffolder
