@@ -19,8 +19,6 @@ spec:
           type: string
           ui:field: RepoUrlPicker
           ui:options:
-            requestUserCredentials: # needed for private repos
-              secretsKey: USER_OAUTH_TOKEN
             allowedHosts:
               - github.com
             allowedOwners:
@@ -68,7 +66,6 @@ spec:
         branchName: ${{ parameters.pr_branch }}
         title: Add Load Balancer
         description: PR created from Roadie Backstage scaffolder
-        token: ${{ secrets.USER_OAUTH_TOKEN }}
     - id: log-message
       name: Log PR URL
       action: debug:log
